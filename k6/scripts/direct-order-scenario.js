@@ -15,13 +15,13 @@ export const options = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { duration: '1s', target: 100 },  // 5초: 100 RPS
-        { duration: '1s', target: 200 },  // 5초: 200 RPS
-        { duration: '1s', target: 300 },  // 5초: 300 RPS
-        { duration: '1s', target: 400 },  // 5초: 400 RPS
-        { duration: '1s', target: 500 },  // 5초: 500 RPS
-        { duration: '10s', target: 500 }, // 30초: 500 RPS 유지
-        { duration: '1s', target: 0 },    // 5초: 쿨다운
+        { duration: '1s', target: 100 },  // 1초: 100 RPS
+        { duration: '1s', target: 200 },  // 1초: 200 RPS
+        { duration: '1s', target: 300 },  // 1초: 300 RPS
+        { duration: '1s', target: 400 },  // 1초: 400 RPS
+        { duration: '1s', target: 500 },  // 1초: 500 RPS
+        { duration: '10s', target: 500 }, // 10초: 500 RPS 유지
+        { duration: '1s', target: 0 },    // 1초: 쿨다운
       ],
     },
   },
