@@ -73,3 +73,18 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// Pinpoint Agent 설정
+//bootRun {
+//	if (project.hasProperty('agent')) {
+//		def agentPath = "/Volumes/E 드라이브/study/ECommerce-project/pinpoint-agent/pinpoint-agent-2.5.4"
+//		def agentId = project.hasProperty('agentId') ? project.property('agentId') : 'ecommerce-api-001'
+//		def applicationName = project.hasProperty('applicationName') ? project.property('applicationName') : 'ECommerce-API'
+//
+//		jvmArgs = [
+//			"-javaagent:${agentPath}/pinpoint-bootstrap-2.5.4.jar",
+//			"-Dpinpoint.agentId=${agentId}",
+//			"-Dpinpoint.applicationName=${applicationName}"
+//		]
+//	}
+//}
