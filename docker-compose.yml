@@ -1,3 +1,8 @@
+networks:
+  k6:
+  grafana:
+#  pinpoint:
+
 services:
   mysql:
     image: mysql:8.0
@@ -143,6 +148,129 @@ services:
       timeout: 10s
       retries: 5
 
+  influxdb:
+    image: influxdb:1.8
+    container_name: ecommerce-influxdb
+    networks:
+      - k6
+      - grafana
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:9.3.8
+    container_name: ecommerce-grafana
+    networks:
+      - grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
+    restart: unless-stopped
+
+  k6:
+    image: grafana/k6:latest
+    container_name: ecommerce-k6
+    networks:
+      - k6
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6_direct_order
+    volumes:
+      - ./k6/scripts/direct-order-scenario.js:/scripts/direct-order-scenario.js
+    entrypoint: ["sh", "-c", "sleep 5 && k6 run /scripts/direct-order-scenario.js"]
+    profiles:
+      - k6
+
+#  pinpoint-zookeeper:
+#    image: zookeeper:3.5
+#    container_name: ecommerce-pinpoint-zookeeper
+#    networks:
+#      - pinpoint
+#    restart: unless-stopped
+#    ports:
+#      - "2183:2181" # 호스트 포트를 2183으로 변경 카프카가 2181 사용중이라서 2181을 사용하면 충돌남
+#    volumes:
+#      - zookeeper_data_pinpoint:/data
+#      - zookeeper_logs_pinpoint:/datalog
+#    healthcheck:
+#      test: ["CMD", "nc", "-z", "localhost", "2181"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#
+#  pinpoint-hbase:
+#    image: pinpointdocker/pinpoint-hbase:2.5.4
+#    container_name: ecommerce-pinpoint-hbase
+#    networks:
+#      - pinpoint
+#    depends_on:
+#      pinpoint-zookeeper:
+#        condition: service_healthy
+#    restart: unless-stopped
+#    environment:
+#      - HBASE_ZOOKEEPER_QUORUM=pinpoint-zookeeper
+#      - HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT=2181
+#    volumes:
+#      - hbase_data:/home/pinpoint/hbase
+#      - ./pinpoint/hbase-config/hbase-site.xml:/opt/hbase/hbase-1.2.6/conf/hbase-site.xml:ro
+#    ports:
+#      - "16010:16010"
+##    healthcheck:
+##      test: ["CMD-SHELL", "pgrep -f 'proc_master' > /dev/null || exit 1"]
+##      interval: 30s
+##      timeout: 20s
+##      retries: 30
+##      start_period: 180s
+#
+#  pinpoint-collector:
+#    image: pinpointdocker/pinpoint-collector:2.5.4
+#    container_name: ecommerce-pinpoint-collector
+#    networks:
+#      - pinpoint
+#    depends_on:
+#      - pinpoint-hbase
+#    restart: unless-stopped
+#    ports:
+#      - "9991:9991"
+#      - "9992:9992"
+#      - "9993:9993"
+#      - "9994:9994"
+#      - "9995:9995"
+#      - "9996:9996"
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=release
+#      - PINPOINT_ZOOKEEPER_ADDRESS=pinpoint-zookeeper
+#      - CLUSTER_ENABLE=false
+#      - LOGGING_LEVEL_ROOT=INFO
+#
+#  pinpoint-web:
+#    image: pinpointdocker/pinpoint-web:2.5.4
+#    container_name: ecommerce-pinpoint-web
+#    networks:
+#      - pinpoint
+#    depends_on:
+#      - pinpoint-hbase
+##      pinpoint-collector:
+##        condition: service_started
+#    restart: unless-stopped
+#    ports:
+#      - "8079:8080"
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=release
+#      - PINPOINT_ZOOKEEPER_ADDRESS=pinpoint-zookeeper
+#      - CLUSTER_ENABLE=false
+#      - ADMIN_PASSWORD=admin
+#      - LOGGING_LEVEL_ROOT=INFO
+
 volumes:
   mysql_data:
   redis-data:
@@ -151,3 +279,6 @@ volumes:
   kafka-1-data:
   kafka-2-data:
   kafka-3-data:
+#  hbase_data:
+#  zookeeper_data_pinpoint:
+#  zookeeper_logs_pinpoint:

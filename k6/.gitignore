@@ -1,0 +1,13 @@
+# k6 결과 파일
+results/*.json
+results/*.html
+results/*.xml
+
+# 테스트 데이터
+data/*.csv
+data/*.json
+
+# 로그 파일
+*.log
+
+README.md

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,11 @@ import java.time.Duration;
  * - 다중 인스턴스 환경에서 효과적
  */
 @Configuration
+@RequiredArgsConstructor
 public class RedisCacheConfig {
+
+    // ObjectMapper 설정: Java 8 날짜/시간 타입 + Hibernate Lazy Loading 지원
+    private final ObjectMapper objectMapper;
 
     /**
      * Redis 캐시 매니저
@@ -36,8 +41,6 @@ public class RedisCacheConfig {
      */
     @Bean
     public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
-        // ObjectMapper 설정: Java 8 날짜/시간 타입 + Hibernate Lazy Loading 지원
-        ObjectMapper objectMapper = new ObjectMapper();
 
         // Java 8 날짜/시간 타입 지원 (LocalDateTime 등)
         objectMapper.registerModule(new JavaTimeModule());
@@ -55,7 +58,7 @@ public class RedisCacheConfig {
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfSubType(Object.class)  // 모든 타입 허용
                 .build();
-        objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        objectMapper.activateDefaultTyping(ptv, com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
 
         RedisCacheConfiguration config =
                 RedisCacheConfiguration.defaultCacheConfig()
